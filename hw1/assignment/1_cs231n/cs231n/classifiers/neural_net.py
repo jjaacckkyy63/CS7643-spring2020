@@ -87,6 +87,7 @@ def two_layer_net(X, model, y=None, reg=0.0):
   # hidden layer --> output
   z2 = z1.dot(W2) + b2
   scores = z2
+
   #############################################################################
   #                              END OF YOUR CODE                             #
   #############################################################################
@@ -114,6 +115,7 @@ def two_layer_net(X, model, y=None, reg=0.0):
   reg_loss = 0.5 * reg * (np.sum(W1**2) + np.sum(W2**2))
 
   loss = softmax_loss + reg_loss
+
 
   #############################################################################
   #                              END OF YOUR CODE                             #
