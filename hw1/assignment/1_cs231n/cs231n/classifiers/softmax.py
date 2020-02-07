@@ -15,6 +15,7 @@ def softmax_loss_vectorized(W, X, y, reg):
   - gradient with respect to weights W, an array of same size as W
   """
   # Initialize the loss and gradient to zero.
+
   loss = 0.0
   dW = np.zeros_like(W)
 
@@ -24,7 +25,27 @@ def softmax_loss_vectorized(W, X, y, reg):
   # here, it is easy to run into numeric instability. Don't forget the        #
   # regularization!                                                           #
   #############################################################################
-  pass
+  num_x = X.shape[1]
+  # loss
+  z = np.matmul(W, X) # CxN
+  exp_z = np.exp(z+np.exp(-10))
+  exp_prob = exp_z / np.sum(exp_z, axis=0, keepdims=True)
+  loss = np.sum(-np.log(exp_prob[y, range(num_x)]))
+  loss /= num_x
+  loss += 0.5 * reg * np.sum(W**2)
+
+  # gradient
+  dz = exp_z / np.sum(exp_z, axis=0, keepdims=True)
+  dz[y, range(num_x)] -= 1
+  dW = np.dot(dz, X.T)
+  dW /= num_x
+  dW += reg * W
+  
+
+  
+
+        
+  
   #############################################################################
   #                          END OF YOUR CODE                                 #
   #############################################################################

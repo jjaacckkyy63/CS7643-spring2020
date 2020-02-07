@@ -80,7 +80,13 @@ def two_layer_net(X, model, y=None, reg=0.0):
   # Store the result in the scores variable, which should be an array of      #
   # shape (N, C).                                                             #
   #############################################################################
-  pass
+  ReLU = lambda x: np.maximum(0, x)
+  # input --> hidden layer
+  z1 = X.dot(W1) + b1
+  z1 = ReLU(z1)
+  # hidden layer --> output
+  z2 = z1.dot(W2) + b2
+  scores = z2
   #############################################################################
   #                              END OF YOUR CODE                             #
   #############################################################################
@@ -98,7 +104,17 @@ def two_layer_net(X, model, y=None, reg=0.0):
   # classifier loss. So that your results match ours, multiply the            #
   # regularization loss by 0.5                                                #
   #############################################################################
-  pass
+  # avoid numerical instability
+  scores -= np.max(scores, axis=1, keepdims=True)  
+  sum_exp_scores = np.sum(np.exp(scores), axis=1, keepdims=True)
+
+  probs = np.exp(scores) / sum_exp_scores
+
+  softmax_loss = np.sum( -np.log(probs[np.arange(N), y]) ) / N
+  reg_loss = 0.5 * reg * (np.sum(W1**2) + np.sum(W2**2))
+
+  loss = softmax_loss + reg_loss
+
   #############################################################################
   #                              END OF YOUR CODE                             #
   #############################################################################
@@ -110,7 +126,22 @@ def two_layer_net(X, model, y=None, reg=0.0):
   # and biases. Store the results in the grads dictionary. For example,       #
   # grads['W1'] should store the gradient on W1, and be a matrix of same size #
   #############################################################################
-  pass
+  dscore = probs.copy()
+  dscore[np.arange(N), y] -= 1
+  dscore /= N
+
+  grads['W2'] = z1.T.dot(dscore) 
+  grads['b2'] = np.sum(dscore, axis=0)
+  
+  dz1 = np.dot(dscore, W2.T)
+  dz1[z1<=0] = 0 # relu
+
+  grads['W1'] = np.dot(X.T, dz1)
+  grads['b1'] = np.sum(dz1, axis=0)
+
+  grads['W1'] += reg * W1
+  grads['W2'] += reg * W2
+
   #############################################################################
   #                              END OF YOUR CODE                             #
   #############################################################################

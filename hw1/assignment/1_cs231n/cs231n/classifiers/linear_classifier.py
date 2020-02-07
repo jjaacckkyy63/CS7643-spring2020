@@ -45,7 +45,13 @@ class LinearClassifier:
       # Hint: Use np.random.choice to generate indices. Sampling with         #
       # replacement is faster than sampling without replacement.              #
       #########################################################################
-      pass
+      X_batch = None
+      y_batch = None
+
+      batch_indices = np.random.choice(num_train, batch_size, replace=True)
+      X_batch = X[:, batch_indices]
+      y_batch = y[batch_indices]
+      
       #########################################################################
       #                       END OF YOUR CODE                                #
       #########################################################################
@@ -59,7 +65,7 @@ class LinearClassifier:
       # TODO:                                                                 #
       # Update the weights using the gradient and the learning rate.          #
       #########################################################################
-      pass
+      self.W -= learning_rate * grad
       #########################################################################
       #                       END OF YOUR CODE                                #
       #########################################################################
@@ -87,7 +93,7 @@ class LinearClassifier:
     # TODO:                                                                   #
     # Implement this method. Store the predicted labels in y_pred.            #
     ###########################################################################
-    pass
+    y_pred = np.argmax(np.dot(self.W, X), axis=0)
     ###########################################################################
     #                           END OF YOUR CODE                              #
     ###########################################################################
@@ -107,7 +113,7 @@ class LinearClassifier:
     - loss as a single float
     - gradient with respect to self.W; an array of the same shape as W
     """
-    pass
+    
 
 
 class Softmax(LinearClassifier):
