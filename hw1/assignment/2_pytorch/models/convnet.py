@@ -19,7 +19,11 @@ class CNN(nn.Module):
         #############################################################################
         # TODO: Initialize anything you need for the forward pass
         #############################################################################
-        pass
+        C, H, W = im_size
+        self.conv = nn.Conv2d(C, hidden_dim, kernel_size, stride=1, padding=(kernel_size-1)//2)
+        self.relu = nn.ReLU(inplace=True)
+        self.maxpool = nn.MaxPool2d(kernel_size=2, stride=2) # H/2*W/2
+        self.fc = nn.Linear((H//2)*(W//2)*hidden_dim, n_classes)
         #############################################################################
         #                             END OF YOUR CODE                              #
         #############################################################################
@@ -44,7 +48,11 @@ class CNN(nn.Module):
         #############################################################################
         # TODO: Implement the forward pass. This should take few lines of code.
         #############################################################################
-        pass
+        out = self.conv(images)
+        out = self.relu(out)
+        out = self.maxpool(out)
+        out = out.view((images.shape[0], -1))
+        scores = self.fc(out)
         #############################################################################
         #                             END OF YOUR CODE                              #
         #############################################################################

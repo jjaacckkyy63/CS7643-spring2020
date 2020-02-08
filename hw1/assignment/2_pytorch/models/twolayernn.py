@@ -20,7 +20,10 @@ class TwoLayerNN(nn.Module):
         #############################################################################
         # TODO: Initialize anything you need for the forward pass
         #############################################################################
-        pass
+        C, H, W = im_size
+        self.fc1 = nn.Linear(C*H*W, hidden_dim)
+        self.fc2 = nn.Linear(hidden_dim, n_classes)
+        self.relu = nn.ReLU(inplace=True)
         #############################################################################
         #                             END OF YOUR CODE                              #
         #############################################################################
@@ -45,7 +48,9 @@ class TwoLayerNN(nn.Module):
         #############################################################################
         # TODO: Implement the forward pass. This should take very few lines of code.
         #############################################################################
-        pass
+        scores = self.fc1(images.view(images.shape[0], -1))
+        scores = self.relu(scores)
+        scores = self.fc2(scores)        
         #############################################################################
         #                             END OF YOUR CODE                              #
         #############################################################################
