@@ -45,7 +45,7 @@ class MyModel(nn.Module):
         #############################################################################
         # TODO: Implement the forward pass.
         #############################################################################
-        out = self.features(x)
+        out = self.features(images)
         out = out.view(out.size(0), -1)
         scores = self.classifier(out)
         #############################################################################
