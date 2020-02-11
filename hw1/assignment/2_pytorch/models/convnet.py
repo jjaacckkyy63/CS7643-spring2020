@@ -48,7 +48,24 @@ class CNN(nn.Module):
         #############################################################################
         # TODO: Implement the forward pass. This should take few lines of code.
         #############################################################################
-        out = self.conv(images)
+        
+        from torchvision import transforms
+        transform = transforms.Compose([
+                transforms.ToPILImage(),
+                 #transforms.RandomRotation(30),
+                 #transforms.RandomAffine(15),
+                transforms.RandomHorizontalFlip(),
+                #transforms.RandomCrop(32, padding=4),
+                transforms.ToTensor()
+                ])
+        tmp = []
+        for image in images:
+            image = transform(np.uint8(image.view(32,32,3).cpu().numpy()))
+            tmp.append(image)
+        
+        images = torch.stack(tmp).cuda()
+        
+        out = self.conv(images.cuda())
         out = self.relu(out)
         out = self.maxpool(out)
         out = out.view((images.shape[0], -1))

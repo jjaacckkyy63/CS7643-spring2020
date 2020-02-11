@@ -8,7 +8,7 @@ python -u train.py \
     --model mymodel \
     --kernel-size 1 \
     --hidden-dim 10 \
-    --epochs 500 \
+    --epochs 200 \
     --weight-decay 0.0 \
     --momentum 0.99 \
     --batch-size 128 \

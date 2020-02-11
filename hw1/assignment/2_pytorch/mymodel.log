@@ -1,0 +1,22 @@
+Files already downloaded and verified
+Files already downloaded and verified
+Files already downloaded and verified
+Train Epoch: 1 [0/49000 (0%)]	Train Loss: 0.212179	Val Loss: 1.359533	Val Acc: 82.03125
+Train Epoch: 1 [1280/49000 (3%)]	Train Loss: 0.059376	Val Loss: 1.368662	Val Acc: 79.375
+Train Epoch: 1 [2560/49000 (5%)]	Train Loss: 0.093176	Val Loss: 0.814656	Val Acc: 83.28125
+Train Epoch: 1 [3840/49000 (8%)]	Train Loss: 0.063264	Val Loss: 0.936758	Val Acc: 82.96875
+Train Epoch: 1 [5120/49000 (10%)]	Train Loss: 0.043534	Val Loss: 1.059240	Val Acc: 81.71875
+Train Epoch: 1 [6400/49000 (13%)]	Train Loss: 0.044503	Val Loss: 1.126217	Val Acc: 78.75
+Train Epoch: 1 [7680/49000 (16%)]	Train Loss: 0.069583	Val Loss: 0.816935	Val Acc: 83.28125
+Train Epoch: 1 [8960/49000 (18%)]	Train Loss: 0.021994	Val Loss: 0.981578	Val Acc: 82.1875
+Train Epoch: 1 [10240/49000 (21%)]	Train Loss: 0.064462	Val Loss: 1.048112	Val Acc: 81.40625
+Train Epoch: 1 [11520/49000 (23%)]	Train Loss: 0.010855	Val Loss: 1.086242	Val Acc: 82.34375
+Train Epoch: 1 [12800/49000 (26%)]	Train Loss: 0.012400	Val Loss: 1.071643	Val Acc: 80.78125
+Train Epoch: 1 [14080/49000 (29%)]	Train Loss: 0.016661	Val Loss: 0.939495	Val Acc: 83.4375
+Train Epoch: 1 [15360/49000 (31%)]	Train Loss: 0.010694	Val Loss: 1.069163	Val Acc: 81.875
+Train Epoch: 1 [16640/49000 (34%)]	Train Loss: 0.004099	Val Loss: 1.161475	Val Acc: 81.5625
+Train Epoch: 1 [17920/49000 (37%)]	Train Loss: 0.014233	Val Loss: 1.082659	Val Acc: 83.28125
+Train Epoch: 1 [19200/49000 (39%)]	Train Loss: 0.017579	Val Loss: 1.002656	Val Acc: 83.75
+Train Epoch: 1 [20480/49000 (42%)]	Train Loss: 0.002745	Val Loss: 1.046864	Val Acc: 83.75
+Train Epoch: 1 [21760/49000 (44%)]	Train Loss: 0.003272	Val Loss: 0.929583	Val Acc: 86.40625
+Train Epoch: 1 [23040/49000 (47%)]	Train Loss: 0.015279	Val Loss: 1.038807	Val Acc: 83.59375

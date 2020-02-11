@@ -6,12 +6,12 @@
 #############################################################################
 python -u train.py \
     --model convnet \
-    --kernel-size 5 \
+    --kernel-size 3 \
     --hidden-dim 50 \
-    --epochs 50 \
-    --weight-decay 0.9 \
+    --epochs 200 \
+    --weight-decay 0 \
     --momentum 0.9 \
-    --batch-size 512 \
+    --batch-size 128 \
     --lr 0.001 | tee convnet.log
 #############################################################################
 #                             END OF YOUR CODE                              #

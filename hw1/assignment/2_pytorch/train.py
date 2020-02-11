@@ -97,6 +97,7 @@ elif args.model == 'convnet':
 elif args.model == 'mymodel':
     model = models.mymodel.MyModel(im_size, args.hidden_dim,
                                args.kernel_size, n_classes)
+    model = torch.load(args.model+'.pt')
 else:
     raise Exception('Unknown model {}'.format(args.model))
 # cross-entropy loss function
@@ -111,7 +112,8 @@ if args.cuda:
 #optimizer = torch.optim.SGD(model.parameters(), lr=args.lr, momentum=args.momentum, weight_decay=args.weight_decay)
 optimizer = torch.optim.Adam(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
 
-lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=30*len(train_loader), gamma=0.1)
+#lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=30*len(train_loader), gamma=0.1)
+lr_scheduler = optim.lr_scheduler.MultiStepLR(optimizer, milestones=[75, 150], gamma=0.5)
 #############################################################################
 #                             END OF YOUR CODE                              #
 #############################################################################
