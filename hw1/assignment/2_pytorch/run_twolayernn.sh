@@ -6,9 +6,9 @@
 #############################################################################
 python -u train.py \
     --model twolayernn \
-    --hidden-dim 50 \
-    --epochs 30 \
-    --weight-decay 0.95 \
+    --hidden-dim 512 \
+    --epochs 40 \
+    --weight-decay 1e-5\
     --momentum 0.9 \
     --batch-size 512 \
     --lr 0.001 | tee twolayernn.log
