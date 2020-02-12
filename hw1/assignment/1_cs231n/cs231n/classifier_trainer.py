@@ -122,7 +122,7 @@ class ClassifierTrainer(object):
           raise ValueError('Unrecognized update type "%s"' % update)
 
         # update the parameters
-        model[p] += dx
+        model[p] += dxq
 
       # every epoch perform an evaluation on the validation set
       first_it = (it == 0)
