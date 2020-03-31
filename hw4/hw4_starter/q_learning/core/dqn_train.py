@@ -5,6 +5,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.optim as optim
+import torch.nn.functional as F
 
 from core.q_train import QNTrain
 
@@ -34,6 +35,8 @@ class DQNTrain(QNTrain):
         for param in self.target_q_net.parameters():
             param.requires_grad = False
         self.target_q_net.eval()
+        
+        self.config = config
 
         if config.optim_type == 'adam':
             self.optimizer = optim.Adam(
@@ -62,7 +65,11 @@ class DQNTrain(QNTrain):
         #####################################################################
         # TODO: Process state to match the return output specified above.
         #####################################################################
-        pass
+        if len(state.shape) == 4:
+            state = torch.from_numpy(state).float().to(self.device) / self.config.high
+        if len(state.shape) == 3:
+            state = np.expand_dims(state, axis=0)
+            state = torch.from_numpy(state).float().to(self.device) / self.config.high
         #####################################################################
         #                             END OF YOUR CODE                      #
         #####################################################################
@@ -116,7 +123,17 @@ class DQNTrain(QNTrain):
         #       use the done_mask to compute Q_samp(s) from the equation
         #       specified above.
         #####################################################################
-        pass
+        # Compute a mask of non-final states and concatenate the batch elements
+        # (a final state would've been the one after which simulation ended)
+        
+        state_action_values = self.q_net(state).gather(1, action.view(action.shape[0], 1))
+        next_state_values = self.target_q_net(next_state).max(1)[0].detach()
+        next_state_values = next_state_values * (1-done_mask)
+        
+        # Compute the expected Q values
+        expected_state_action_values = (next_state_values * self.config.gamma) + reward
+#         loss = torch.sum((expected_state_action_values - state_action_values)**2)
+        loss = F.mse_loss(state_action_values, expected_state_action_values.unsqueeze(1)).to(self.device)
         #####################################################################
         #                             END OF YOUR CODE                      #
         #####################################################################
@@ -127,14 +144,15 @@ class DQNTrain(QNTrain):
         """
         Update parametes of Q' with parameters of Q
         """
-        pass
         #####################################################################
         # TODO: Update the parameters of self.target_q_net with the
         # parameters of self.q_net, refer to the documentation of
         # torch.nn.Module.load_state_dict and torch.nn.Module.state_dict
         # This should just take 1-2 lines of code.
         #####################################################################
-        pass
+#         self.target_q_net.load_state_dict(self.q_net.state_dict())
+        for target_param, local_param in zip(self.target_q_net.parameters(), self.q_net.parameters()):
+            target_param.data.copy_(1e-3*local_param.data + (1.0-1e-3)*target_param.data)
         #####################################################################
         #                             END OF YOUR CODE                      #
         #####################################################################
@@ -196,8 +214,7 @@ class DQNTrain(QNTrain):
                 using self.module_grad_norm
         """
 
-        s_batch, a_batch, r_batch, sp_batch, done_mask_batch \
-            = replay_buffer.sample(self.config.batch_size)
+        s_batch, a_batch, r_batch, sp_batch, done_mask_batch = replay_buffer.sample(self.config.batch_size)
 
         #####################################################################
         # TODOs:
@@ -215,7 +232,24 @@ class DQNTrain(QNTrain):
         #   of the gradients using self.module_grad_norm on self.q_net
         #   AFTER calling backward.
         #####################################################################
-        pass
+        
+        # 1.
+        s_batch = self.process_state(s_batch)
+        a_batch = torch.tensor(a_batch).long().to(self.device)
+        r_batch = torch.tensor(r_batch).float().to(self.device)
+        sp_batch = torch.tensor(sp_batch).float().to(self.device)
+        done_mask_batch = torch.tensor(done_mask_batch).float().to(self.device)
+        
+        # 2. 
+        q_loss = self.forward_loss(s_batch, a_batch, r_batch, 
+                                   sp_batch, done_mask_batch)
+        # 3. 
+        self.optimizer.zero_grad()
+        q_loss.backward()
+        self.optimizer.step()
+        self.update_target_params()
+        grad_norm_eval = self.module_grad_norm(self.q_net)
+
         #####################################################################
         #                             END OF YOUR CODE                      #
         #####################################################################

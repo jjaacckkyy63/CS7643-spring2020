@@ -2,7 +2,9 @@ import numpy as np
 
 import torch
 import torch.nn as nn
-
+import torch.nn.functional as F
+from torch.autograd import Variable
+from core.dqn_train import *
 
 class LinearQNet(nn.Module):
     def __init__(self, env, config):
@@ -20,7 +22,8 @@ class LinearQNet(nn.Module):
         #     number of actions: env.action_space.n
         #     number of stacked observations in state: config.state_history
         #####################################################################
-        pass
+        H, W, C = env.observation_space.shape
+        self.q_layer = nn.Linear(H * W * C * config.state_history, env.action_space.n)
         #####################################################################
         #                             END OF YOUR CODE                      #
         #####################################################################
@@ -38,7 +41,10 @@ class LinearQNet(nn.Module):
         #####################################################################
         # TODO: Implement the forward pass, 1-2 lines.
         #####################################################################
-        pass
+#         state = process_state(state)
+        q_table = F.relu(self.q_layer(state.view(state.shape[0],-1)))
+        return q_table
         #####################################################################
         #                             END OF YOUR CODE                      #
         #####################################################################
+        

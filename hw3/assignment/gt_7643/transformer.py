@@ -48,8 +48,8 @@ class ClassificationTransformer(nn.Module):
         # Deliverable 1: Initialize what you need for the embedding lookup (1 line). #
         # Hint: you will need to use the max_length parameter above.                 #
         ##############################################################################
-
-        
+        self.word_embedding = nn.Embedding(self.vocab_size, self.hidden_dim)
+        self.pos_embedding = nn.Parameter(torch.randn(self.max_length, self.hidden_dim))
         ##############################################################################
         #                               END OF YOUR CODE                             #
         ##############################################################################
@@ -79,8 +79,11 @@ class ClassificationTransformer(nn.Module):
         # Deliverable 3: Initialize what you need for the feed-forward layer.        # 
         # Don't forget the layer normalization.                                      #
         ##############################################################################
-
+        self.feed_forward_1 = nn.Linear(self.hidden_dim, self.dim_feedforward)
+        self.feed_forward_2 = nn.Linear(self.dim_feedforward, self.hidden_dim)
         
+        self.relu = nn.ReLU()
+        self.norm_feed_forward = nn.LayerNorm(self.hidden_dim)
         ##############################################################################
         #                               END OF YOUR CODE                             #
         ##############################################################################
@@ -89,8 +92,8 @@ class ClassificationTransformer(nn.Module):
         ##############################################################################
         # Deliverable 4: Initialize what you need for the final layer (1-2 lines).   #
         ##############################################################################
-
-        
+        self.fc = nn.Linear(self.hidden_dim, 1)
+        self.score = nn.Sigmoid()
         ##############################################################################
         #                               END OF YOUR CODE                             #
         ##############################################################################
@@ -111,8 +114,10 @@ class ClassificationTransformer(nn.Module):
         # You will need to use all of the methods you have previously defined above.#
         # You should only be calling ClassificationTransformer class methods here.  #
         #############################################################################
-
-        
+        outputs = self.embed(inputs)
+        outputs = self.multi_head_attention(outputs)
+        outputs = self.feedforward_layer(outputs)
+        outputs = self.final_layer(outputs)
         ##############################################################################
         #                               END OF YOUR CODE                             #
         ##############################################################################
@@ -130,7 +135,13 @@ class ClassificationTransformer(nn.Module):
         # Note: word_to_ix has keys from 0 to self.vocab_size - 1                   #
         # This will take a few lines.                                               #
         #############################################################################
+        N, T = inputs.shape
+        embeddings = self.word_embedding(inputs)
+        #print(w_emb.shape)
+        #print(self.pos_embedding.shape)
         
+        for i in range(N):
+            embeddings[i] += self.pos_embedding[:T, :]
 
         ##############################################################################
         #                               END OF YOUR CODE                             #
@@ -151,8 +162,21 @@ class ClassificationTransformer(nn.Module):
         # Deliverable 2: Implement multi-head self-attention followed by add + norm.#
         # Use the provided 'Deliverable 2' layers initialized in the constructor.   #
         #############################################################################
+
+        kf1 = self.k1(inputs)
+        vf1 = self.v1(inputs)
+        qf1 = self.q1(inputs)
+        kf2 = self.k2(inputs)
+        vf2 = self.v2(inputs)
+        qf2 = self.q2(inputs)
         
+        z1 = torch.matmul(self.softmax(torch.bmm(qf1, kf1.transpose(1,2))/np.sqrt(self.dim_k)), vf1)
+        z2 = torch.matmul(self.softmax(torch.bmm(qf2, kf2.transpose(1,2))/np.sqrt(self.dim_k)), vf2)
+       
+        z = torch.cat((z1, z2), 2)
+        attn = self.attention_head_projection(z)
         
+        outputs = self.norm_mh(inputs + attn)
         ##############################################################################
         #                               END OF YOUR CODE                             #
         ##############################################################################
@@ -170,8 +194,11 @@ class ClassificationTransformer(nn.Module):
         # Use a ReLU activation and apply the linear layers in the order you        #
         # initialized them.                                                         #
         # This should not take more than 3-5 lines of code.                         #
-        #############################################################################
-        
+        #############################################################################        
+        outputs = self.feed_forward_1(inputs)
+        outputs = self.relu(outputs)
+        outputs = self.feed_forward_2(outputs)
+        outputs = self.norm_feed_forward(inputs + outputs)
         
         ##############################################################################
         #                               END OF YOUR CODE                             #
@@ -189,8 +216,9 @@ class ClassificationTransformer(nn.Module):
         # Deliverable 4: Implement the final layer for the Transformer classifier.  #
         # This should not take more than 2 lines of code.                         #
         #############################################################################
-        
-        
+        # Why choose zero is right?????
+        outputs = self.fc(inputs[:, 0, :])
+        outputs = self.score(outputs)
         ##############################################################################
         #                               END OF YOUR CODE                             #
         ##############################################################################

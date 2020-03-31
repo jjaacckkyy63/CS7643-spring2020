@@ -32,6 +32,7 @@ the parameters P, nS, nA, gamma are defined as follows:
 """
 
 def policy_evaluation(P, nS, nA, policy, gamma=0.9, tol=1e-3):
+# def policy_evaluation(P, nS, nA, policy, value_function, gamma=0.9, tol=1e-3):
     """Evaluate the value function from a given policy.
 
     Parameters
@@ -54,7 +55,21 @@ def policy_evaluation(P, nS, nA, policy, gamma=0.9, tol=1e-3):
     #####################################################################
     # YOUR IMPLEMENTATION HERE
     #####################################################################
-    pass
+    while True:
+        delta = 0
+        for s, a in enumerate(policy):
+            v = 0 # current value
+            for (probability, next_s, reward, terminal) in P[s][a]:
+                if terminal:
+                    v += probability * reward
+                else:
+                    v += probability * (reward + gamma * value_function[next_s])
+                    
+            delta = max(delta, np.abs(v - value_function[s]))
+            value_function[s] = v
+        if delta < tol:
+            break
+            
     #####################################################################
     #                             END OF YOUR CODE                      #
     #####################################################################
@@ -86,7 +101,12 @@ def policy_improvement(P, nS, nA, value_from_policy, policy, gamma=0.9):
     #####################################################################
     # YOUR IMPLEMENTATION HERE
     #####################################################################
-    pass
+    # calculate q table
+    Q_table = np.zeros([nS, nA])
+    # go through every state and find highest return action
+    for s in range(nS):
+        Q_table[s] = est_act_value(s, value_from_policy, nA, P, gamma)
+    new_policy = np.argmax(Q_table, axis = 1)
     #####################################################################
     #                             END OF YOUR CODE                      #
     #####################################################################
@@ -117,7 +137,12 @@ def policy_iteration(P, nS, nA, gamma=0.9, tol=10e-3):
     #####################################################################
     # YOUR IMPLEMENTATION HERE
     #####################################################################
-    pass
+    policy_diff = nS
+    while policy_diff != 0:
+        value_function = policy_evaluation(P, nS, nA, policy, gamma, tol)
+        new_policy = policy_improvement(P, nS, nA, value_function, policy, gamma)
+        policy_diff = (policy != new_policy).sum()
+        policy = new_policy
     #####################################################################
     #                             END OF YOUR CODE                      #
     #####################################################################
@@ -147,7 +172,21 @@ def value_iteration(P, nS, nA, gamma=0.9, tol=1e-3):
     #####################################################################
     # YOUR IMPLEMENTATION HERE
     #####################################################################
-    pass
+    while True:
+        delta = 0
+        # for every current state s
+        for s in range(nS):
+            action_value = est_act_value(s, value_function, nA, P, gamma) # sigma of all value of possible state of all action
+            best_action_value = np.max(action_value) # Max value action
+            delta = max(delta, np.abs(best_action_value - value_function[s]))
+            value_function[s] = best_action_value
+        if tol > delta:
+            break
+    Q_table = np.zeros([nS,nA])
+    for s in range(nS):
+        Q_table[s] = est_act_value(s, value_function, nA, P, gamma)
+
+    policy = np.argmax(Q_table, axis= 1)
     #####################################################################
     #                             END OF YOUR CODE                      #
     #####################################################################
@@ -219,3 +258,11 @@ def evaluate(env, policy, max_steps=100, max_episodes=32):
 
     print(f"> Average reward over {max_episodes} episodes:\t\t\t {episode_rewards}")
     print(f"> Percentage of episodes goal reached:\t\t\t {success * 100:.0f}%")
+    
+    
+def est_act_value(state, V, nA, P, gamma):
+    Act_v = np.zeros(nA)
+    for i in range(nA):
+        for prob, next_state, reward, _ in P[state][i]: # cache storing all temporal data
+            Act_v[i] += prob * (reward + gamma * V[next_state]) # esitimate next state
+    return Act_v
