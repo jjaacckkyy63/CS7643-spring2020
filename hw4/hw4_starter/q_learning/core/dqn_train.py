@@ -66,10 +66,10 @@ class DQNTrain(QNTrain):
         # TODO: Process state to match the return output specified above.
         #####################################################################
         if len(state.shape) == 4:
-            state = torch.from_numpy(state).float().to(self.device) / self.config.high
+            state = torch.from_numpy(state).float().to(self.device) #/ self.config.high
         if len(state.shape) == 3:
             state = np.expand_dims(state, axis=0)
-            state = torch.from_numpy(state).float().to(self.device) / self.config.high
+            state = torch.from_numpy(state).float().to(self.device) #/ self.config.high
         #####################################################################
         #                             END OF YOUR CODE                      #
         #####################################################################
@@ -128,11 +128,10 @@ class DQNTrain(QNTrain):
         
         state_action_values = self.q_net(state).gather(1, action.view(action.shape[0], 1))
         next_state_values = self.target_q_net(next_state).max(1)[0].detach()
-        next_state_values = next_state_values * (1-done_mask)
+        next_state_values = next_state_values * (1-done_mask) # ensure done_mask shape to 32,1
         
         # Compute the expected Q values
-        expected_state_action_values = (next_state_values * self.config.gamma) + reward
-#         loss = torch.sum((expected_state_action_values - state_action_values)**2)
+        expected_state_action_values = (next_state_values * self.config.gamma) + reward # ensure reward shape to 32,1
         loss = F.mse_loss(state_action_values, expected_state_action_values.unsqueeze(1)).to(self.device)
         #####################################################################
         #                             END OF YOUR CODE                      #
@@ -150,7 +149,6 @@ class DQNTrain(QNTrain):
         # torch.nn.Module.load_state_dict and torch.nn.Module.state_dict
         # This should just take 1-2 lines of code.
         #####################################################################
-#         self.target_q_net.load_state_dict(self.q_net.state_dict())
         for target_param, local_param in zip(self.target_q_net.parameters(), self.q_net.parameters()):
             target_param.data.copy_(1e-3*local_param.data + (1.0-1e-3)*target_param.data)
         #####################################################################
