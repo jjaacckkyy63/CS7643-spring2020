@@ -25,7 +25,9 @@ class LinearQNet(nn.Module):
         
         # multiple layer !!!!!
         H, W, C = env.observation_space.shape
-        self.q_layer = nn.Linear(H * W * C * config.state_history, env.action_space.n)
+        self.h1_layer = nn.Linear(H * W * C * config.state_history, 128)
+        self.h2_layer = nn.Linear(128, 256)
+        self.q_layer = nn.Linear(256, env.action_space.n)
         #####################################################################
         #                             END OF YOUR CODE                      #
         #####################################################################
@@ -43,8 +45,10 @@ class LinearQNet(nn.Module):
         #####################################################################
         # TODO: Implement the forward pass, 1-2 lines.
         #####################################################################
-#         state = process_state(state)
-        q_table = F.relu(self.q_layer(state.view(state.shape[0],-1))) # no relu
+        out = F.relu(self.h1_layer(state.view(state.shape[0],-1)))
+        out = F.relu(self.h2_layer(out))
+#         q_table = F.relu(self.q_layer(out)) # no relu
+        q_table = self.q_layer(out) # no relu
         return q_table
         #####################################################################
         #                             END OF YOUR CODE                      #

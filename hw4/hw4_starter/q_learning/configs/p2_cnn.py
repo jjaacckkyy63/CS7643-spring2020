@@ -13,7 +13,8 @@ class config():
     plot_output  = output_path + "scores.png"
 
     # model and training config
-    num_episodes_test = 20
+#     num_episodes_test = 20
+    num_episodes_test = 50    
     grad_clip         = True
     clip_val          = 10
     saving_freq       = 5000

@@ -126,13 +126,21 @@ class DQNTrain(QNTrain):
         # Compute a mask of non-final states and concatenate the batch elements
         # (a final state would've been the one after which simulation ended)
         
-        state_action_values = self.q_net(state).gather(1, action.view(action.shape[0], 1))
+        action = action.view(action.shape[0], 1)
+        done_mask = done_mask.view(done_mask.shape[0], 1)
+        reward = reward.view(reward.shape[0], 1)
+                        
+        state_action_values = self.q_net(state).gather(1, action)
+        state_action_values = state_action_values.view(state_action_values.shape[0], -1)
+
         next_state_values = self.target_q_net(next_state).max(1)[0].detach()
+        next_state_values = next_state_values.view(next_state_values.shape[0], -1)
         next_state_values = next_state_values * (1-done_mask) # ensure done_mask shape to 32,1
+
         
         # Compute the expected Q values
         expected_state_action_values = (next_state_values * self.config.gamma) + reward # ensure reward shape to 32,1
-        loss = F.mse_loss(state_action_values, expected_state_action_values.unsqueeze(1)).to(self.device)
+        loss = F.mse_loss(state_action_values, expected_state_action_values).to(self.device)
         #####################################################################
         #                             END OF YOUR CODE                      #
         #####################################################################
@@ -151,6 +159,8 @@ class DQNTrain(QNTrain):
         #####################################################################
         for target_param, local_param in zip(self.target_q_net.parameters(), self.q_net.parameters()):
             target_param.data.copy_(1e-3*local_param.data + (1.0-1e-3)*target_param.data)
+
+#         self.target_q_net.load_state_dict(self.q_net.state_dict())
         #####################################################################
         #                             END OF YOUR CODE                      #
         #####################################################################
@@ -244,8 +254,11 @@ class DQNTrain(QNTrain):
         # 3. 
         self.optimizer.zero_grad()
         q_loss.backward()
+#         for param in self.q_net.parameters():
+#             param.grad.data.clamp_(-1, 1)
         self.optimizer.step()
         self.update_target_params()
+        
         grad_norm_eval = self.module_grad_norm(self.q_net)
 
         #####################################################################
